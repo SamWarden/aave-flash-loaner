@@ -16,7 +16,7 @@ const { formatEther, parseEther } = ethers.utils;
 const UNISWAP_ROUTER: string = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 const UNISWAP_FACTORY: string = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
 
-describe("Start Testing...(this might take a while)", async () => {
+describe("FlashSwap", async () => {
   let accounts: SignerWithAddress[];
   let owner: SignerWithAddress;
 
@@ -54,7 +54,6 @@ describe("Start Testing...(this might take a while)", async () => {
     usdt = await TToken.deploy("USDT", "USDT", 18);
     btc = await TToken.deploy("BTC", "BTC", 18);
 
-
     uniswapRouter = UniswapRouter.attach(UNISWAP_ROUTER);
     uniswapFactory = UniswapFactory.attach(UNISWAP_FACTORY);
 
@@ -65,33 +64,28 @@ describe("Start Testing...(this might take a while)", async () => {
     await btc.deployed();
 
     // Mint some amount of each token to the owner
-    await weth.mint(owner.address, parseEther("1000"));
-    await dai.mint(owner.address, parseEther("4000"));
-    await usdt.mint(owner.address, parseEther("2500"));
-    await btc.mint(owner.address, parseEther("2000"));
+    await (await weth.mint(owner.address, parseEther("1000"))).wait();
+    await (await dai.mint(owner.address, parseEther("4000"))).wait();
+    await (await usdt.mint(owner.address, parseEther("2500"))).wait();
+    await (await btc.mint(owner.address, parseEther("2000"))).wait();
 
     // Approve the ability of router to remove some liquidity from the wallet of the one calling this method (owner)
-    await weth.approve(uniswapRouter.address, parseEther("1000"));
-    await dai.approve(uniswapRouter.address, parseEther("4000"));
-    await usdt.approve(uniswapRouter.address, parseEther("2500"));
-    await btc.approve(uniswapRouter.address, parseEther("2000"));
+    await (await weth.approve(uniswapRouter.address, parseEther("1000"))).wait();
+    await (await dai.approve(uniswapRouter.address, parseEther("4000"))).wait();
+    await (await usdt.approve(uniswapRouter.address, parseEther("2500"))).wait();
+    await (await btc.approve(uniswapRouter.address, parseEther("2000"))).wait();
   });
 
-  it("Initializing FlashSwap...", async () => {
+  it("Initializing FlashSwap", async () => {
     // Deploy fresh contract 
     const flashSwap: Contract = await FlashSwap.deploy(uniswapFactory.address, uniswapRouter.address);
-    await flashSwap.deployed();
-
+    console.log(await flashSwap.deployed());
 
     // Add liquidity to different contracts in different ratios
-    const addTxLoan: TransactionResponse = await uniswapRouter.addLiquidity(btc.address, usdt.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000); // 1/1
-    await addTxLoan.wait();
-    const addTxWeth: TransactionResponse = await uniswapRouter.addLiquidity(dai.address, weth.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000); // 1/1
-    await addTxWeth.wait();
-    const addTxUsdt: TransactionResponse = await uniswapRouter.addLiquidity(dai.address, usdt.address, parseEther("1000"), parseEther("1500"), 0, 0, owner.address, Date.now() + 60000); // 2/3
-    await addTxUsdt.wait();
-    const addTxBtc: TransactionResponse = await uniswapRouter.addLiquidity(dai.address, btc.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000); // 1/1
-    await addTxBtc.wait();
+    await (await uniswapRouter.addLiquidity(dai.address, weth.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 1/1
+    await (await uniswapRouter.addLiquidity(dai.address, usdt.address, parseEther("1000"), parseEther("1500"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 3/2
+    await (await uniswapRouter.addLiquidity(dai.address, btc.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 1/1
+    await (await uniswapRouter.addLiquidity(btc.address, usdt.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 1/1
 
     // Form a path of all addresses
     // NOTE that it MUST be looped (dai -.....- dai)

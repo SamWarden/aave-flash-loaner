@@ -13,12 +13,16 @@ import "hardhat-contract-sizer";
 // Add some .env individual variables
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const ALCHEMYAPI_URL = process.env.ALCHEMYAPI_URL;
 
 const MAINNET_PRIVATE_KEY = process.env.MAINNET_PRIVATE_KEY;
 const BSC_MAINNET_PRIVATE_KEY = process.env.BSC_MAINNET_PRIVATE_KEY;
 const BSC_TESTNET_PRIVATE_KEY = process.env.BSC_TESTNET_PRIVATE_KEY;
 const KOVAN_PRIVATE_KEY = process.env.KOVAN_PRIVATE_KEY;
 const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
+
+// Use AlchemyAPI to make fork if its URL specifyed else use the Infura API
+const FORK_URL = ALCHEMYAPI_URL || `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`;
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -33,7 +37,13 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
-    hardhat: {},
+    hardhat: {
+      forking: {
+        url: FORK_URL,
+        // specifing blockNumber available only for AlchemyAPI
+        blockNumber: ALCHEMYAPI_URL ? 24686431 : undefined,
+      },
+    },
     localhost: {},
     mainnet: {
       url: `https://mainnet.infura.io/v3/${INFURA_PROJECT_ID}`,

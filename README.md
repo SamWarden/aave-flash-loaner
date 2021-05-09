@@ -1,9 +1,10 @@
 ## Description
 
-FlashSwap is a smartcontract to make flashswaps with Uniswap. This mechanism allows you to make a swap if you only have enough money just to pay the fee.
+FlashSwap is a smartcontract to make flashswaps with Uniswap. This mechanism allows you to make a swap if you only have enough money just to pay the fee. This can be used in an arbitrage bot
 
 * [Core concept](https://uniswap.org/docs/v2/core-concepts/flash-swaps/)
 * [Detailed description](https://uniswap.org/docs/v2/smart-contract-integration/using-flash-swaps/)
+* [Arbitrage bot](https://blog.infura.io/build-a-flash-loan-arbitrage-bot-on-infura-part-i)
 
 ## Contract
 
@@ -17,9 +18,8 @@ constructor(address factory, address router) public;
 
 You can use your own Router and Factory or get actual address for default networks below:
 
-UniswapV2Router02: 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
-
-UniswapV2Factory: 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f
+* UniswapV2Router02: 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+* UniswapV2Factory: 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f
 
 ### startFlashLoan
 
@@ -31,7 +31,7 @@ This method borrows tokens from uniswapPair, makes swap with Router, returns loa
 
 * `amountIn` — amount of tokens that will be borrowed.
 * `path` — an array of token addresses between which the swap will be performed in turn. First and last addresses **must** be the same to make a looped swap. Contract saves it to a private attribute `_path` to read it in the method `uniswapV2Call` that will be called next.
-You can pass it using `data` argument  instead of an attribute, if you need it. `data` is a `bytes` type therefore if you want to pass addresses as an argument you need a library to convert list of addresses to bytes and vice versa. You can read about this [here](https://ethereum.stackexchange.com/a/90801). 
+You can pass it using `data` argument instead of an attribute, if you need it. `data` is a `bytes` type therefore if you want to pass addresses as an argument you need a library to convert list of addresses to bytes and vice versa. You can read about this [here](https://ethereum.stackexchange.com/a/90801). 
 * `baseToken` — an address of a token that creates a liquidity containing pair with `path[0]` token. This token **must not** be in a `path` array, because UniswapPair doesn't allow to call swap method while some other swap is incomplete.
 
 ### Dependencies
@@ -52,7 +52,7 @@ Use _.env_ as a local config to set private options manually:
 cp .env.template .env
 ```
 
-You should also register at  [Infura](https://infura.io/) and create new project there. 
+You should also register at [Infura](https://infura.io/) and create new project there. 
 
 After that set your Infura Project ID (from project settings) to _.env_
 
@@ -84,9 +84,19 @@ A script to deploy the FlashSwap contract and to get it's address:
 npx hardhat run scripts/1_deploy_flashswap.ts --network kovan
 ```
 
-### Run tests
+### Run local tests
 
-Hardhat allows you to execute tests in it's own network, but due to the fact that you need to interact with Uniswap, you should run it in a network where the Uniswap is. For example - Kovan.
+Hardhat allows you to execute tests in it's own network, but due to the fact that you need to interact with Uniswap, you need to make a fork of a network where the Uniswap is. For example - Kovan.
+
+You can use [AlchemyAPI](https://www.alchemy.com/), then you will can specify the block from which the fork will be made. To use AlchemyAPI, create an app in its dashboard and set it's URL to _.env_. If the AlchemyAPI URL not setted Infura API will be used.
+
+**Important: Infura API takes a last block during run test. This can lead to different results for the same tests**
+
+```bash
+npx hardhat test test/FlashSwap.ts
+```
+
+### Run tests in a testnet
 
 ```bash
 npx hardhat test test/FlashSwap.ts --network kovan

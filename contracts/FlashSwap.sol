@@ -18,9 +18,9 @@ contract FlashSwap is IUniswapV2Callee {
     address private immutable _router;
     address[] private _path;
 
-    constructor(address factoryAddr, address routerAddr) public {
-        _factoryAddr = factoryAddr;
-        _routerAddr = routerAddr;
+    constructor(address factory, address router) public {
+        _factory = factory;
+        _router = router;
     }
 
     function startFlashLoan(uint amountIn, address[] calldata path, address baseToken) external {
