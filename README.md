@@ -87,8 +87,10 @@ npx hardhat run scripts/1_deploy_flashswap.ts --network kovan
 ### Run local tests
 
 Hardhat allows you to execute tests in it's own network, but due to the fact that you need to interact with Uniswap, you need to make a fork of a network where the Uniswap is. For example - Kovan.
+
 You can use [AlchemyAPI](https://www.alchemy.com/), then you will can specify the block from which the fork will be made. To use AlchemyAPI, create an app in its dashboard and set it's URL to _.env_. If the AlchemyAPI URL not setted Infura API will be used.
-**Important: Infura API takes a last block during run test. This can lead to different results for the 
+
+**Important: Infura API takes a last block during run test. This can lead to different results for the same tests**
 
 ```bash
 npx hardhat test test/FlashSwap.ts
