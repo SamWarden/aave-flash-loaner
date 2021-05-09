@@ -2,8 +2,7 @@
 
 pragma solidity ^0.6.6;
 
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol';
-
+import './interfaces/IUniswapV2Callee.sol';
 import './interfaces/IUniswapV2Pair.sol';
 import './libraries/UniswapV2Library.sol';
 import './libraries/SafeMath.sol';
