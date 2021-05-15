@@ -16,7 +16,6 @@ const { formatEther, parseEther } = ethers.utils;
 const UNISWAP_ROUTER: string = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
 const AAVE_ADDRESSES_PROVIDER: string = "0x88757f2f99175387ab4c6a4b3067c77a695b0349"; //kovan
 const KOVAN_DAI_ADDRESS: string = "0xff795577d9ac8bd7d90ee22b6c1703490b6512fd";
-// "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5"; //mainnet
 
 describe("FlashLoaner", async () => {
   let accounts: SignerWithAddress[];
@@ -36,9 +35,6 @@ describe("FlashLoaner", async () => {
   let btc: Contract;
   let uniswapFactory: Contract;
   let uniswapRouter: Contract;
-  // let addressesProvider: Contract;
-  // let lendingPool: Contract;
-  // let lendingPoolConfigurator: Contract;
 
   before(async () => {
     accounts = await ethers.getSigners();
@@ -48,20 +44,13 @@ describe("FlashLoaner", async () => {
     FlashLoaner = getContractFactory("FlashLoaner", owner);
     TToken = getContractFactory("TToken", owner);
     UniswapRouter = getContractFactory("IUniswapV2Router02", owner);
-    // AddressesProvider = getContractFactory("ILendingPoolAddressesProvider", owner);
-    // LendingPool = getContractFactory("ILendingPool", owner);
-    // LendingPoolConfigurator = getContractFactory("ILendingPoolConfigurator", owner);
 
     uniswapRouter = UniswapRouter.attach(UNISWAP_ROUTER);
-    // addressesProvider = AddressesProvider.attach(AAVE_ADDRESSES_PROVIDER);
-    // lendingPool = LendingPool.attach(await addressesProvider.getLendingPool());
     dai = TToken.attach(KOVAN_DAI_ADDRESS);
-    // lendingPoolConfigurator = LendingPoolConfigurator.attach(await addressesProvider.getLendingPoolConfigurator());
   });
 
   // Before each test-block we deploy contracts using previously created factories
   beforeEach(async () => {
-    // dai = await TToken.deploy("DAI", "DAI", 18); //kovan dai: 0xff795577d9ac8bd7d90ee22b6c1703490b6512fd
     usdt = await TToken.deploy("USDT", "USDT", 18);
     btc = await TToken.deploy("BTC", "BTC", 18);
 
@@ -69,19 +58,11 @@ describe("FlashLoaner", async () => {
     await usdt.deployed();
     await btc.deployed();
 
-    // hre.network
-    // Immitate the lending configurator acocount
-    // const poolMangerAddr: string = await addressesProvider.getLendingPoolManager();
-    // await network.provider.request({method: "hardhat_impersonateAccount", params: [poolMangerAddr]});
-    // const poolManger: Signer = ethers.getSigner(poolMangerAddr);
-
     // Mint some amount of each token to the owner
-    // await (await dai.mint(owner.address, parseEther("3000"))).wait();
     await (await usdt.mint(owner.address, parseEther("2500"))).wait();
     await (await btc.mint(owner.address, parseEther("2000"))).wait();
 
     // Approve the ability of router to remove some liquidity from the wallet of the one calling this method (owner)
-    // await (await dai.approve(lendingPool.address, parseEther("1000"))).wait();
     await (await dai.approve(uniswapRouter.address, parseEther("2000"))).wait();
     await (await usdt.approve(uniswapRouter.address, parseEther("2500"))).wait();
     await (await btc.approve(uniswapRouter.address, parseEther("2000"))).wait();
@@ -96,7 +77,6 @@ describe("FlashLoaner", async () => {
     await (await uniswapRouter.addLiquidity(dai.address, usdt.address, parseEther("1000"), parseEther("1500"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 3/2
     await (await uniswapRouter.addLiquidity(dai.address, btc.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 1/1
     await (await uniswapRouter.addLiquidity(btc.address, usdt.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 1/1
-    // await (await lendingPool.deposit(dai.address, parseEther("1000"), 0)).wait();
 
     // Form a path of all addresses
     // NOTE that it MUST be looped (dai -.....- dai)
