@@ -81,14 +81,14 @@ Copy generated private key (or your own private key) to _.env_ config on the cor
 
 Add some ETH to address of this wallet. For tests you can use any _faucet_ for your network. For example [faucet.kovan.network](https://faucet.kovan.network)
 
-Also you should get DAI in kovan, because AAVE allows to borrow only tokens that were added to its list. Use the [AAVE Faucet](https://testnet.aave.com/faucet) to get DAI
+Also you should get DAI in kovan, because AAVE allows to borrow only tokens that were added to its list. Use the [AAVE Faucet](https://testnet.aave.com/faucet) to get DAI (0xff795577d9ac8bd7d90ee22b6c1703490b6512fd)
 
 #### Deploy the FlashLoaner contract
 
 A script to deploy the FlashLoaner contract and to get it's address:
 
 ```bash
-npx hardhat run scripts/1_deploy_flash_loaner.ts --network kovan
+npx hardhat run scripts/1_deploy_flashloaner.ts --network kovan
 ```
 
 ### Run local tests
