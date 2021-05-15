@@ -2,6 +2,7 @@ import { config as dotEnvConfig } from "dotenv";
 dotEnvConfig();
 
 import { HardhatUserConfig } from "hardhat/types";
+import { ethers } from "ethers";
 
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
@@ -24,6 +25,8 @@ const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
 // Use AlchemyAPI to make fork if its URL specifyed else use the Infura API
 const FORK_URL = ALCHEMYAPI_URL || `https://kovan.infura.io/v3/${INFURA_PROJECT_ID}`;
 
+const BLOCK_NUMBER: number | undefined = undefined;
+
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   solidity: {
@@ -41,8 +44,12 @@ const config: HardhatUserConfig = {
       forking: {
         url: FORK_URL,
         // specifing blockNumber available only for AlchemyAPI
-        blockNumber: ALCHEMYAPI_URL ? 24686431 : undefined,
+        blockNumber: ALCHEMYAPI_URL ? BLOCK_NUMBER : undefined,
       },
+      accounts: KOVAN_PRIVATE_KEY ? [{
+        privateKey: KOVAN_PRIVATE_KEY,
+        balance: ethers.utils.parseEther('10000').toString(),
+      }] : [],
     },
     localhost: {},
     mainnet: {
