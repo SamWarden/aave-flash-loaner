@@ -67,7 +67,8 @@ contract FlashLoaner is FlashLoanReceiverBase {
         );
 
         // Approve the LendingPool contract allowance to *pull* the owed amount
-        IERC20(assets[0]).approve(address(LENDING_POOL), amounts[0].add(premiums[0]));
+        uint amountOwing = amounts[0].add(premiums[0]);
+        IERC20(assets[0]).approve(address(LENDING_POOL), amountOwing);
 
         return true;
     }
