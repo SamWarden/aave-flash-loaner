@@ -70,12 +70,14 @@ describe("FlashLoaner", async () => {
 
   it("Initializing FlashLoaner", async () => {
     // Deploy fresh contract 
+    console.log(AAVE_ADDRESSES_PROVIDER, uniswapRouter.address);
     const flashLoaner: Contract = await FlashLoaner.deploy(AAVE_ADDRESSES_PROVIDER, uniswapRouter.address);
     console.log(await flashLoaner.deployed());
 
     // Add liquidity to different contracts in different ratios
-    await (await uniswapRouter.addLiquidity(dai.address, usdt.address, parseEther("1000"), parseEther("1500"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 3/2
+
     await (await uniswapRouter.addLiquidity(dai.address, btc.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 1/1
+    await (await uniswapRouter.addLiquidity(dai.address, usdt.address, parseEther("1000"), parseEther("1500"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 3/2
     await (await uniswapRouter.addLiquidity(btc.address, usdt.address, parseEther("1000"), parseEther("1000"), 0, 0, owner.address, Date.now() + 60000)).wait(); // 1/1
 
     // Form a path of all addresses
@@ -83,6 +85,7 @@ describe("FlashLoaner", async () => {
     const path: string[] = [dai.address, usdt.address, btc.address, dai.address];
 
     // Run main function
-    console.log(await flashLoaner.startFlashLoan(parseEther("0.1"), path));
+    console.log(parseEther("0.1"), path);
+    console.log(await flashLoaner.startFlashLoan(parseEther("100000"), path));
   });
 });
