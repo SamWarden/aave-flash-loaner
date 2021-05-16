@@ -5,18 +5,32 @@ pragma solidity ^0.6.6;
 import "./FlashLoanReceiverBase.sol";
 import "./interfaces/IUniswapV2Router02.sol";
 import "./interfaces/IERC20.sol";
+import "./libraries/UniswapV2Library.sol";
 
 contract FlashLoaner is FlashLoanReceiverBase {
     IUniswapV2Router02 private immutable _router;
+    address private immutable _factory;
     address[] private _path;
 
-    constructor(address addressProvider, address router) FlashLoanReceiverBase(addressProvider) public {
+    constructor(address addressesProvider, address router) FlashLoanReceiverBase(addressesProvider) public {
         _router = IUniswapV2Router02(router);
+        _factory = IUniswapV2Router02(router).factory();
     }
 
     function startFlashLoan(uint amount, address[] calldata path) external {
         require(path.length >= 3, "FlashLoaner: Length of this path has to be at least 3");
         require(path[0] == path[path.length - 1], "FlashLoaner: First and last tokens must be the same token");
+
+        (uint reserveIn1, uint reserveOut1) = UniswapV2Library.getReserves(_factory, path[0], path[1]);
+        (uint reserveIn2, uint reserveOut2) = UniswapV2Library.getReserves(_factory, path[1], path[2]);
+        uint swapProfit1 = UniswapV2Library.getAmountOut(amount, reserveIn1, reserveOut1);
+        uint swapProfit2 = UniswapV2Library.getAmountOut(amount, reserveIn2, reserveOut2);
+
+        require(
+            swapProfit1.mul(swapProfit2).mul(997).mul(997) > amount.mul(swapProfit1).mul(1000).mul(1000) ||
+            swapProfit1.mul(swapProfit2).mul(1000).mul(1000) < amount.mul(swapProfit1).mul(997).mul(997),
+            "FlashLoaner: Flash loan is not possible"
+        );
 
         // Save the path to use it in executeOperation
         _path = path;
