@@ -27,8 +27,7 @@ contract FlashLoaner is FlashLoanReceiverBase {
         uint swapProfit2 = UniswapV2Library.getAmountOut(amount, reserveIn2, reserveOut2);
 
         require(
-            swapProfit1.mul(swapProfit2).mul(997).mul(997) > amount.mul(swapProfit1).mul(1000).mul(1000) ||
-            swapProfit1.mul(swapProfit2).mul(1000).mul(1000) < amount.mul(swapProfit1).mul(997).mul(997),
+            swapProfit1.mul(swapProfit2).mul(997).mul(997) > amount.mul(swapProfit1).mul(1000).mul(1000)
             "FlashLoaner: Flash loan is not possible"
         );
 
